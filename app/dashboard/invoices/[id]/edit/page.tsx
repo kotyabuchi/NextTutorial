@@ -5,8 +5,27 @@ import {
   fetchCustomers
 } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next'
 
-export default async function Page({ params }: { params: { id: string } }) {
+type Props = {
+  params: { id: string }
+}
+
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+  const id = params.id
+  const [invoice, customers] = await Promise.all([
+    fetchInvoiceById(id),
+    fetchCustomers(),
+  ])
+  const customer = customers.filter((customer) => customer.id == invoice.customer_id)[0]
+  return {
+    title: `Edit ${customer.name}'s Invoice`
+  }
+}
+
+export default async function Page({ params }: Props) {
   const id = params.id;
   const [invoice, customers] = await Promise.all([
     fetchInvoiceById(id),
